@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// Result holds all the channels
 type Result struct {
 	Upstream          []Upstream
 	Downstream        []Downstream
@@ -13,6 +14,8 @@ type Result struct {
 	ProvisionedUSRate uint64
 	Init              Init
 }
+
+// Init holds misc info
 type Init struct {
 	AcquireDsChanelStatusHz  string
 	AcquireDsChanelComment   string
@@ -31,6 +34,8 @@ type Init struct {
 	SystemUpTime             string
 	ExtUsPower               string
 }
+
+// Upstream channels
 type Upstream struct {
 	Channel     uint64
 	Lock        string
@@ -40,6 +45,8 @@ type Upstream struct {
 	FrequencyHz uint64
 	Power       float64
 }
+
+//Downstream channels
 type Downstream struct {
 	Channel        uint64
 	Lock           string

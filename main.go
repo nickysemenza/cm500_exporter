@@ -10,8 +10,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -35,7 +33,8 @@ func (c *Client) fetchStatusPage() (string, error) {
 	}
 	req.SetBasicAuth(c.Username, c.Password)
 
-	// do it twice so that we get the XSRF_TOKEN from Set-Cookie
+	// do it twice so that we get the XSRF_TOKEN from Set-Cookie..
+	// TOOD: fix this
 	client.Do(req)
 	res, err := client.Do(req)
 	if err != nil {
@@ -52,21 +51,6 @@ func (c *Client) fetchStatusPage() (string, error) {
 
 	return string(body), nil
 }
-
-var (
-	frequency = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "frequency_hz",
-		Help: "Frequency in Hertz.",
-	}, []string{"direction", "channel"})
-	power = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "power",
-		Help: "Power dBmV.",
-	}, []string{"direction", "channel"})
-	downstreamSNR = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "ds_snr_db",
-		Help: "Downstream Signal to Noise ratio in Decibels.",
-	}, []string{"channel"})
-)
 
 func main() {
 
