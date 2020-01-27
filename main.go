@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/spf13/viper"
 )
 
 // Client holds conenction information
@@ -54,10 +55,18 @@ func (c *Client) fetchStatusPage() (string, error) {
 
 func main() {
 
+	viper.SetDefault("address", "192.168.100.1")
+	viper.SetDefault("username", "admin")
+	viper.SetDefault("password", "password")
+	viper.SetDefault("port",2112)
+	viper.AutomaticEnv()
+
+	port := viper.GetInt("port")
+
 	c := Client{
-		Address:  "192.168.100.1",
-		Username: "admin",
-		Password: "password",
+		Address:  viper.GetString("address"),
+		Username: viper.GetString("username"),
+		Password: viper.GetString("password"),
 	}
 	go func() {
 		for {
@@ -86,7 +95,9 @@ func main() {
 
 	http.HandleFunc("/", c.dump)
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	bind := fmt.Sprintf(":%d",port)
+	log.Printf("listening on %v",bind)
+	http.ListenAndServe(bind, nil)
 
 }
 func (c *Client) dump(w http.ResponseWriter, r *http.Request) {
