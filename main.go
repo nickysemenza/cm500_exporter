@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/cookiejar"
 	"strconv"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -20,6 +20,7 @@ type Client struct {
 	Username string
 	Password string
 	latest   *Result
+	Interval time.Duration
 }
 
 func (c *Client) fetchStatusPage() (string, error) {
@@ -58,7 +59,8 @@ func main() {
 	viper.SetDefault("address", "192.168.100.1")
 	viper.SetDefault("username", "admin")
 	viper.SetDefault("password", "password")
-	viper.SetDefault("port",2112)
+	viper.SetDefault("port", 2112)
+	viper.SetDefault("interval", "30s")
 	viper.AutomaticEnv()
 
 	port := viper.GetInt("port")
@@ -67,19 +69,21 @@ func main() {
 		Address:  viper.GetString("address"),
 		Username: viper.GetString("username"),
 		Password: viper.GetString("password"),
+		Interval: viper.GetDuration("interval"),
 	}
 	go func() {
 		for {
-			time.Sleep(2 * time.Second)
-
 			data, err := c.fetchStatusPage()
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("failed to fetch status page: %v", err)
+				continue
 			}
 			res, err := parseStatusHTML(data)
 			if err != nil {
-				log.Fatal(err)
+				log.Printf("failed to parse status page: %v", err)
+				continue
 			}
+			log.Println("fetched")
 			c.latest = res
 			for _, d := range res.Downstream {
 				frequency.WithLabelValues("ds", strconv.FormatUint(d.Channel, 10)).Set(float64(d.FrequencyHz))
@@ -90,13 +94,14 @@ func main() {
 				frequency.WithLabelValues("us", strconv.FormatUint(u.Channel, 10)).Set(float64(u.FrequencyHz))
 				power.WithLabelValues("us", strconv.FormatUint(u.Channel, 10)).Set(float64(u.Power))
 			}
+			time.Sleep(c.Interval)
 		}
 	}()
 
 	http.HandleFunc("/", c.dump)
 	http.Handle("/metrics", promhttp.Handler())
-	bind := fmt.Sprintf(":%d",port)
-	log.Printf("listening on %v",bind)
+	bind := fmt.Sprintf(":%d", port)
+	log.Printf("listening on %v, parsing %s every %s", bind, c.Address, c.Interval)
 	http.ListenAndServe(bind, nil)
 
 }

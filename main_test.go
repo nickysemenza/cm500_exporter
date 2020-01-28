@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/stretchr/testify/require"
 	"io/ioutil"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/davecgh/go-spew/spew"
 )
@@ -11,9 +12,7 @@ import (
 func Test_parseStatusHTML(t *testing.T) {
 	require := require.New(t)
 	content, err := ioutil.ReadFile("example_DocsisStatus.htm")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(err)
 
 	res, err := parseStatusHTML(string(content))
 	require.NoError(err)
