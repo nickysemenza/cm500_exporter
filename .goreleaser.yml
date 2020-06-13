@@ -31,3 +31,27 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+nfpms:
+  # note that this is an array of nfpm configs
+  - # Your app's vendor.
+    # Default is empty.
+    vendor: Nicky Semenza
+    # Your app's homepage.
+    # Default is empty.
+    homepage: https://github.com/nickysemenza/cm500_exporter
+
+    # Your app's maintainer (probably you).
+    # Default is empty.
+    maintainer: Nicky Semenza <n@nickysemenza.com>
+
+    # Your app's description.
+    # Default is empty.
+    description: Netgear CM500 Prometheus exporter
+
+    # Formats to be generated.
+    formats:
+      - deb
+      - rpm
+
+    # Override default /usr/local/bin destination for binaries
+    bindir: /usr/bin
