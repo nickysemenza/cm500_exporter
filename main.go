@@ -59,7 +59,7 @@ func main() {
 	viper.SetDefault("address", "192.168.100.1")
 	viper.SetDefault("username", "admin")
 	viper.SetDefault("password", "password")
-	viper.SetDefault("port", 2112)
+	viper.SetDefault("port", 4023)
 	viper.SetDefault("interval", "30s")
 	viper.AutomaticEnv()
 
